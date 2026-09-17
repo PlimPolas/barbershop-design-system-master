@@ -9,6 +9,20 @@ interface GalleryTickerProps {
   items: MediaAsset[];
 }
 
+interface GalleryItemProps {
+  item: MediaAsset;
+  sizes: string;
+  fluid?: boolean;
+}
+
+export function GalleryItem({ item, sizes, fluid = false }: GalleryItemProps) {
+  return (
+    <div className={`${fluid ? '' : 'gallery-item'} overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface)]`}>
+      <FocalImage asset={item} aspectRatio="4 / 3" sizes={sizes} />
+    </div>
+  );
+}
+
 function GalleryRow({ items, reverse, paused }: { items: MediaAsset[]; reverse?: boolean; paused: boolean }) {
   const repeated = [...items, ...items];
 
@@ -16,11 +30,19 @@ function GalleryRow({ items, reverse, paused }: { items: MediaAsset[]; reverse?:
     <div className="gallery-viewport" aria-hidden="true">
       <div className="gallery-track" data-direction={reverse ? 'reverse' : 'forward'} data-paused={paused}>
         {repeated.map((item, index) => (
-          <div key={`${item.id}-${index}`} className="gallery-item overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface)]">
-            <FocalImage asset={item} aspectRatio="4 / 3" sizes="(min-width: 768px) 18rem, 10rem" />
-          </div>
+          <GalleryItem key={`${item.id}-${index}`} item={item} sizes="(min-width: 768px) 18rem, 10rem" />
         ))}
       </div>
+    </div>
+  );
+}
+
+export function GalleryGridFallback({ items }: GalleryTickerProps) {
+  return (
+    <div className="gallery-fallback grid-cols-2 gap-[var(--space-3)] md:grid-cols-3">
+      {items.map((item) => (
+        <GalleryItem key={item.id} item={item} sizes="(min-width: 768px) 33vw, 50vw" fluid />
+      ))}
     </div>
   );
 }
@@ -49,13 +71,7 @@ export function GalleryTicker({ items }: GalleryTickerProps) {
         <GalleryRow items={firstRow} paused={paused} />
         <GalleryRow items={secondRow} reverse paused={paused} />
       </div>
-      <div className="gallery-fallback grid-cols-2 gap-[var(--space-3)] md:grid-cols-3">
-        {items.map((item) => (
-          <div key={item.id} className="overflow-hidden border border-[var(--border-subtle)]">
-            <FocalImage asset={item} aspectRatio="4 / 3" sizes="(min-width: 768px) 33vw, 50vw" />
-          </div>
-        ))}
-      </div>
+      <GalleryGridFallback items={items} />
     </div>
   );
 }

@@ -1,9 +1,7 @@
 import {
   ArrowRight,
-  ArrowUpRight,
   AtSign,
   Check,
-  MapPin,
   MessageCircle,
   Phone,
 } from 'lucide-react';
@@ -13,43 +11,19 @@ import { ActionLink } from '@/components/actions';
 import { PageContainer, SectionContainer, SectionHeader } from '@/components/layout';
 import { FocalImage } from '@/components/media';
 import { barbers, brand, landingContent, locations, media, reviews, services } from '@/data';
-import type { MediaAsset, OpeningPeriod } from '@/types';
+import type { MediaAsset } from '@/types';
 
-import { BarberCard } from './barber-card';
 import { GalleryTicker } from './gallery-ticker';
-import { ReviewCard } from './review-card';
+import { formatPhoneHref, formatWhatsappHref, LocationSection } from './location-section';
+import { ReviewsSection } from './reviews-section';
 import { ServiceCard } from './service-card';
 import { SiteNavbar } from './site-navbar';
-
-const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
+import { TeamSection } from './team-section';
 
 function getMedia(id: string) {
   const asset = media.find((item) => item.id === id);
   if (!asset) throw new Error(`Missing media asset: ${id}`);
   return asset;
-}
-
-function formatPhoneHref(phone: string) {
-  return `tel:${phone.replace(/[^+\d]/g, '')}`;
-}
-
-function formatWhatsappHref(phone: string) {
-  return `https://wa.me/${phone.replace(/\D/g, '')}`;
-}
-
-function OpeningHours({ periods }: { periods: OpeningPeriod[] }) {
-  return (
-    <dl className="space-y-[var(--space-2)]">
-      {periods.map((period) => (
-        <div key={period.day} className="type-small flex items-center justify-between gap-[var(--space-5)]">
-          <dt className="text-[var(--text-muted)]">{dayNames[period.day]}</dt>
-          <dd className="text-right text-[var(--text-primary)]">
-            {period.closed ? 'Fechado' : `${period.opensAt}–${period.closesAt}`}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
 }
 
 function Hero({ asset }: { asset: MediaAsset }) {
@@ -87,7 +61,7 @@ function Hero({ asset }: { asset: MediaAsset }) {
       </div>
       <div className="absolute bottom-[var(--space-6)] right-[var(--page-gutter)] z-10 hidden items-center gap-3 lg:flex">
         <span className="h-px w-12 bg-[var(--brand-accent)]" />
-        <span className="type-eyebrow text-[var(--text-secondary)]">Role para descobrir</span>
+        <span className="type-eyebrow text-[var(--text-secondary)]">{content.scrollHint}</span>
       </div>
     </section>
   );
@@ -99,7 +73,6 @@ export function LandingPage() {
   const activeBarbers = barbers.filter((item) => item.active).sort((a, b) => a.sortOrder - b.sortOrder);
   const featuredReviews = reviews.filter((item) => item.featured);
   const galleryItems = landingContent.gallery.mediaIds.map(getMedia);
-  const address = `${location.addressLine1}, ${location.district} — ${location.city}, ${location.region}`;
 
   return (
     <div className="landing-shell bg-[var(--background-primary)] text-[var(--text-primary)]">
@@ -178,23 +151,7 @@ export function LandingPage() {
           </SectionContainer>
         </section>
 
-        <SectionContainer id="equipe" size="wide" spacing="editorial" className="landing-anchor">
-          <SectionHeader
-            eyebrow={landingContent.team.eyebrow}
-            title={landingContent.team.title}
-            description={landingContent.team.description}
-          />
-          <div className="mt-[var(--space-8)] grid gap-x-[var(--space-4)] gap-y-[var(--space-8)] md:grid-cols-2 lg:grid-cols-3 lg:gap-x-[var(--space-5)]">
-            {activeBarbers.map((barber) => (
-              <BarberCard
-                key={barber.id}
-                barber={barber}
-                media={getMedia(barber.primaryMediaId ?? 'media-foundation-placeholder')}
-                actionPrefix={landingContent.team.actionPrefix}
-              />
-            ))}
-          </div>
-        </SectionContainer>
+        <TeamSection barbers={activeBarbers} resolveMedia={getMedia} />
 
         <section id="galeria" className="landing-anchor overflow-hidden border-y border-[var(--border-subtle)] bg-[var(--background-secondary)] py-[var(--space-9)] md:py-[var(--space-11)]">
           <div className="mx-auto mb-[var(--space-8)] max-w-[var(--container-content)] px-[var(--page-gutter)]">
@@ -207,20 +164,7 @@ export function LandingPage() {
           <GalleryTicker items={galleryItems} />
         </section>
 
-        <SectionContainer id="avaliacoes" size="wide" spacing="editorial" className="landing-anchor">
-          <SectionHeader
-            eyebrow={landingContent.reviews.eyebrow}
-            title={landingContent.reviews.title}
-            description={landingContent.reviews.description}
-          />
-          <div className="review-scroller -mx-[var(--page-gutter)] mt-[var(--space-8)] flex snap-x snap-mandatory gap-[var(--space-4)] overflow-x-auto px-[var(--page-gutter)] pb-[var(--space-4)] lg:mx-0 lg:grid lg:grid-cols-2 lg:overflow-visible lg:px-0 xl:grid-cols-4">
-            {featuredReviews.map((review) => (
-              <div key={review.id} className="w-[82vw] max-w-[22rem] shrink-0 snap-start lg:w-auto lg:max-w-none">
-                <ReviewCard review={review} locale={brand.defaultLocale} />
-              </div>
-            ))}
-          </div>
-        </SectionContainer>
+        <ReviewsSection reviews={featuredReviews} locale={brand.defaultLocale} />
 
         <section className="border-y border-[var(--brand-accent)] bg-[var(--brand-accent-soft)]">
           <SectionContainer size="content" spacing="default">
@@ -254,68 +198,7 @@ export function LandingPage() {
           </SectionContainer>
         </section>
 
-        <SectionContainer id="localizacao" size="wide" spacing="editorial" className="landing-anchor">
-          <div className="grid overflow-hidden border border-[var(--border-subtle)] lg:grid-cols-2">
-            <div className="bg-[var(--surface)] p-[var(--space-5)] md:p-[var(--space-8)] lg:p-[var(--space-9)]">
-              <SectionHeader
-                eyebrow={landingContent.location.eyebrow}
-                title={landingContent.location.title}
-                description={landingContent.location.description}
-              />
-              <div className="mt-[var(--space-7)] grid gap-[var(--space-6)] sm:grid-cols-2">
-                <div>
-                  <p className="type-label">{location.name}</p>
-                  <address className="type-body mt-[var(--space-3)] not-italic text-[var(--text-secondary)]">
-                    {address}<br />CEP {location.postalCode}
-                  </address>
-                  <p className="type-body mt-[var(--space-3)] text-[var(--text-secondary)]">{location.phone}</p>
-                </div>
-                <div>
-                  <p className="type-label mb-[var(--space-3)]">{landingContent.location.hoursLabel}</p>
-                  <OpeningHours periods={location.openingHours} />
-                </div>
-              </div>
-              <div className="mt-[var(--space-7)] grid grid-cols-2 gap-[var(--space-3)] sm:flex sm:flex-wrap">
-                <ActionLink tone="secondary" href={location.directionsUrl ?? location.mapUrl ?? '#'} external>
-                  <MapPin aria-hidden="true" /> {landingContent.location.actions.directions}
-                  <span className="sr-only"> (abre em nova aba)</span>
-                </ActionLink>
-                <ActionLink tone="secondary" href={formatPhoneHref(location.phone)}>
-                  <Phone aria-hidden="true" /> {landingContent.location.actions.call}
-                </ActionLink>
-                {location.whatsapp ? (
-                  <ActionLink tone="secondary" href={formatWhatsappHref(location.whatsapp)} external>
-                    <MessageCircle aria-hidden="true" /> {landingContent.location.actions.whatsapp}
-                    <span className="sr-only"> (abre em nova aba)</span>
-                  </ActionLink>
-                ) : null}
-                <ActionLink href="/booking">
-                  {landingContent.location.actions.booking}
-                </ActionLink>
-              </div>
-            </div>
-            <a
-              href={location.mapUrl ?? location.directionsUrl ?? '#'}
-              target="_blank"
-              rel="noreferrer"
-              className="map-pattern relative grid min-h-[24rem] place-items-center overflow-hidden border-t border-[var(--border-subtle)] lg:min-h-full lg:border-l lg:border-t-0"
-              aria-label={`${landingContent.location.mapLabel}, abrir mapa em nova aba`}
-            >
-              <div className="absolute inset-8 border border-white/10" />
-              <div className="relative z-10 grid place-items-center text-center">
-                <span className="grid size-16 place-items-center rounded-full bg-[var(--brand-accent)] text-[var(--text-on-accent)] shadow-[0_0_0_1rem_rgb(208_161_94/12%)]">
-                  <MapPin aria-hidden="true" className="size-7" />
-                </span>
-                <p className="type-label mt-[var(--space-5)]">{location.district}</p>
-                <p className="type-small mt-1 text-[var(--text-secondary)]">{location.city} · {location.region}</p>
-              </div>
-              <span className="type-eyebrow absolute bottom-[var(--space-5)] right-[var(--space-5)] inline-flex items-center gap-2 text-[var(--text-secondary)]">
-                {landingContent.location.actions.directions}
-                <ArrowUpRight aria-hidden="true" className="size-4" />
-              </span>
-            </a>
-          </div>
-        </SectionContainer>
+        <LocationSection location={location} />
 
         <section className="bg-[var(--surface-inverse)] text-[var(--text-inverse)]">
           <SectionContainer size="content" spacing="default">
@@ -364,8 +247,8 @@ export function LandingPage() {
               <p className="type-label">{landingContent.footer.contactLabel}</p>
               <div className="mt-[var(--space-4)] space-y-2">
                 <a className="type-small flex min-h-11 items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--brand-accent)]" href={formatPhoneHref(location.phone)}><Phone aria-hidden="true" className="size-4" />{location.phone}</a>
-                {location.whatsapp ? <a className="type-small flex min-h-11 items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--brand-accent)]" href={formatWhatsappHref(location.whatsapp)} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" className="size-4" />WhatsApp<span className="sr-only"> (abre em nova aba)</span></a> : null}
-                {brand.socialLinks.instagram ? <a className="type-small flex min-h-11 items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--brand-accent)]" href={brand.socialLinks.instagram} target="_blank" rel="noreferrer"><AtSign aria-hidden="true" className="size-4" />Instagram<span className="sr-only"> (abre em nova aba)</span></a> : null}
+                {location.whatsapp ? <a className="type-small flex min-h-11 items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--brand-accent)]" href={formatWhatsappHref(location.whatsapp)} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" className="size-4" />{landingContent.footer.whatsappLabel}<span className="sr-only"> (abre em nova aba)</span></a> : null}
+                {brand.socialLinks.instagram ? <a className="type-small flex min-h-11 items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--brand-accent)]" href={brand.socialLinks.instagram} target="_blank" rel="noreferrer"><AtSign aria-hidden="true" className="size-4" />{landingContent.footer.instagramLabel}<span className="sr-only"> (abre em nova aba)</span></a> : null}
               </div>
             </div>
             <div>
@@ -375,12 +258,12 @@ export function LandingPage() {
             </div>
           </div>
           <div className="mt-[var(--space-9)] flex flex-col gap-[var(--space-4)] border-t border-[var(--border-subtle)] pt-[var(--space-5)] md:flex-row md:items-center md:justify-between">
-            <p className="type-small text-[var(--text-muted)]">© {new Date().getFullYear()} {brand.name}. Demo fictícia.</p>
+            <p className="type-small text-[var(--text-muted)]">© {new Date().getFullYear()} {brand.name}. {landingContent.footer.copyrightSuffix}</p>
             <div className="flex flex-wrap gap-[var(--space-5)]">
               {landingContent.footer.policies.map((policy) => (
                 <a key={policy.label} href={policy.href} className="type-small min-h-11 py-3 text-[var(--text-muted)] hover:text-[var(--text-primary)]">{policy.label}</a>
               ))}
-              <Link href="/style-guide" className="type-small min-h-11 py-3 text-[var(--text-muted)] hover:text-[var(--text-primary)]">Style Guide</Link>
+              <Link href="/style-guide" className="type-small min-h-11 py-3 text-[var(--text-muted)] hover:text-[var(--text-primary)]">{landingContent.footer.styleGuideLabel}</Link>
             </div>
           </div>
         </div>

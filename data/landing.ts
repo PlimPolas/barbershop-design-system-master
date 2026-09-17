@@ -17,6 +17,7 @@ export const landingContent = {
       'Cortes precisos, barba bem cuidada e uma experiência desenhada para você desacelerar.',
     primaryAction: 'Agendar horário',
     secondaryAction: 'Conhecer serviços',
+    scrollHint: 'Role para descobrir',
     mediaId: 'media-hero-studio',
   },
   socialProof: [
@@ -102,12 +103,15 @@ export const landingContent = {
     description: 'Barbearia autoral para quem valoriza técnica, presença e cuidado.',
     navigationLabel: 'Navegação',
     contactLabel: 'Contato',
+    whatsappLabel: 'WhatsApp',
+    instagramLabel: 'Instagram',
     hoursLabel: 'Horário resumido',
     hoursSummary: 'Seg–qui 10h–19h · Sex 10h–20h · Sáb 9h–18h',
+    copyrightSuffix: 'Demo fictícia.',
+    styleGuideLabel: 'Style Guide',
     policies: [
       { label: 'Privacidade', href: '#' },
       { label: 'Termos', href: '#' },
     ],
   },
 } as const;
-
