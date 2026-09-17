@@ -4,6 +4,7 @@ import '../styles/tokens.css';
 import '../styles/typography.css';
 import '../styles/motion.css';
 import '../components/media/media.css';
+import '../components/landing/landing.css';
 import './globals.css';
 
 const manrope = Manrope({
@@ -19,8 +20,8 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'Barbershop Design System — Foundation',
-  description: 'Style guide interna da fundação do Barbershop Design System Master.',
+  title: 'Ateliê 47 — Barbearia autoral em São Paulo',
+  description: 'Cortes, barba e cuidado com técnica, presença e atenção aos detalhes.',
 };
 
 export default function RootLayout({

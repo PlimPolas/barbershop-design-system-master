@@ -17,6 +17,8 @@ export const locations: Location[] = [
     phone: '+55 11 0000-0000',
     whatsapp: '+55 11 00000-0000',
     email: 'ola@example.com',
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=Centro%2C%20S%C3%A3o%20Paulo%2C%20SP',
+    directionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Centro%2C%20S%C3%A3o%20Paulo%2C%20SP',
     openingHours: [
       { day: 0, closed: true },
       { day: 1, opensAt: '10:00', closesAt: '19:00', closed: false },

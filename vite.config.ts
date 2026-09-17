@@ -47,6 +47,10 @@ export default defineConfig(async () => {
   return {
     css: { postcss: { plugins: [tailwindcss()] } },
     optimizeDeps: {
+      include: [
+        'use-sync-external-store/shim',
+        'use-sync-external-store/shim/with-selector',
+      ],
       exclude: [
         '@base-ui/react',
         '@base-ui/react/button',
