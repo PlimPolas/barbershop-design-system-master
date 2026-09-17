@@ -46,6 +46,19 @@ export default defineConfig(async () => {
 
   return {
     css: { postcss: { plugins: [tailwindcss()] } },
+    optimizeDeps: {
+      exclude: [
+        '@base-ui/react',
+        '@base-ui/react/button',
+        '@base-ui/react/checkbox',
+        '@base-ui/react/input',
+        '@base-ui/react/separator',
+        'lucide-react',
+      ],
+    },
+    resolve: {
+      dedupe: ['react', 'react-dom'],
+    },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
